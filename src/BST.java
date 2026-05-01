@@ -112,5 +112,82 @@ public class BST<K extends Comparable<K>, V> {
                 break; // found it
             }
         }
+
+        if (current == null) return; // key not found
+
+        // case 1: node has no children
+        if (current.left == null && current.right == null) {
+            if (parent == null) {
+                root = null;
+            } else if (isLeftChild) {
+                parent.left = null;
+            } else {
+                parent.right = null;
+            }
+        }
+        // case 2: node has only right child
+        else if (current.left == null) {
+            if (parent == null) {
+                root = current.right;
+            } else if (isLeftChild) {
+                parent.left = current.right;
+            } else {
+                parent.right = current.right;
+            }
+        }
+        // case 3: node has only left child
+        else if (current.right == null) {
+            if (parent == null) {
+                root = current.left;
+            } else if (isLeftChild) {
+                parent.left = current.left;
+            } else {
+                parent.right = current.left;
+            }
+        }
+        // case 4: node has two children
+        // find in-order successor (smallest node in right subtree)
+        else {
+            Node successorParent = current;
+            Node successor = current.right;
+            while (successor.left != null) {
+                successorParent = successor;
+                successor = successor.left;
+            }
+
+            current.key = successor.key;
+            current.val = successor.val;
+
+            // delete the successor
+            if (successorParent == current) {
+                successorParent.right = successor.right;
+            } else {
+                successorParent.left = successor.right;
+            }
+        }
+
+        size--;
+    }
+
+    // iterator using in-order traversal (left, root, right) without recursion
+    // uses a Stack to simulate the call stack
+    public Iterable<Entry> iterator() {
+        List<Entry> list = new ArrayList<>();
+        Stack<Node> stack = new Stack<>();
+        Node current = root;
+
+        while (current != null || !stack.isEmpty()) {
+            // go as far left as possible
+            while (current != null) {
+                stack.push(current);
+                current = current.left;
+            }
+
+            current = stack.pop();
+            list.add(new Entry(current.key, current.val));
+            current = current.right;
+        }
+
+        return list;
     }
 }
